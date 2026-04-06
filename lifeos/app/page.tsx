@@ -1,5 +1,4 @@
-"use client";
-
+import { auth0 } from "@/lib/auth0";
 import DecryptedText from "@/components/DecryptedText";
 import ScrollReveal from "@/components/ScrollReveal";
 import ClickSpark from "@/components/ClickSpark";
@@ -8,15 +7,13 @@ import BorderGlow from "@/components/BorderGlow";
 import Stepper, { Step } from "@/components/Stepper";
 import Silk from "@/components/Silk";
 import { SiGmail, SiGithub, SiSlack, SiAuth0, SiSpotify } from "react-icons/si";
-import { FaAws } from "react-icons/fa";
-import { VscAzure } from "react-icons/vsc";
+
 
 const FEATURES = [
   { icon: <SiGmail size={24} />, label: "Gmail Agent", desc: "Reads, summarizes & drafts email replies on your behalf", scope: "Gmail API", color: "#e8437f" },
   { icon: <SiGithub size={24} />, label: "GitHub Agent", desc: "Opens issues, reviews PRs, manages repos autonomously", scope: "GitHub API", color: "#7c5cfc" },
   { icon: <SiSlack size={24} />, label: "Slack Agent", desc: "Sends messages, reads channels, posts updates", scope: "Slack API", color: "#38bdf8" },
-  { icon: <FaAws size={24} />, label: "AWS Agent", desc: "Provisions infrastructure, toggles EC2 instances, and monitors billing.", scope: "AWS API", color: "#FF9900" },
-  { icon: <VscAzure size={24} />, label: "Azure Agent", desc: "Manages Entra ID policies, deploys resources, scales web apps securely.", scope: "Azure API", color: "#0089D6" },
+
   { icon: <SiSpotify size={24} />, label: "Spotify Agent", desc: "Curates deep-work playlists, skips tracks, controls your focus music.", scope: "Spotify API", color: "#1DB954" },
   { icon: <SiAuth0 size={24} />, label: "Auth0 Vault", desc: "Securely stores & rotates all API tokens — zero trust architecture.", scope: "Token Vault", color: "#eb5424" },
 ];
@@ -28,7 +25,9 @@ const STEPS = [
   { num: "04", title: "You Stay in Control", desc: "Approve or deny any action. Revoke access anytime from the Consent Dashboard." },
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const session = await auth0.getSession();
+
   return (
     <ClickSpark sparkColor="#e8437f" sparkSize={12} sparkRadius={24} sparkCount={10} duration={600}>
       <div style={{ position: "fixed", inset: 0, zIndex: 0 }}>
@@ -56,13 +55,29 @@ export default function LandingPage() {
           />
           <span style={{ fontWeight: 800, fontSize: 18, letterSpacing: "-0.02em" }}>Vyndex</span>
         </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          <a href="/auth/login" className="fluid-glass-btn fluid-glass-secondary" style={{ padding: "8px 18px", fontSize: 13, animationDuration: '6s' }}>
-            Sign In
-          </a>
-          <a href="/auth/login" className="fluid-glass-btn" style={{ padding: "8px 18px", fontSize: 13 }}>
-            Get Started →
-          </a>
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          {session ? (
+            <>
+              <span style={{ color: "var(--text-secondary)", fontSize: 13, marginRight: 8 }}>
+                {session.user.email}
+              </span>
+              <a href="/dashboard" className="fluid-glass-btn" style={{ padding: "8px 18px", fontSize: 13 }}>
+                Dashboard
+              </a>
+              <a href="/auth/logout" className="fluid-glass-btn fluid-glass-secondary" style={{ padding: "8px 18px", fontSize: 13 }}>
+                Logout
+              </a>
+            </>
+          ) : (
+            <>
+              <a href="/auth/login" className="fluid-glass-btn fluid-glass-secondary" style={{ padding: "8px 18px", fontSize: 13 }}>
+                Sign In
+              </a>
+              <a href="/auth/login?screen_hint=signup" className="fluid-glass-btn" style={{ padding: "8px 18px", fontSize: 13 }}>
+                Get Started →
+              </a>
+            </>
+          )}
         </div>
       </nav>
 
@@ -72,7 +87,6 @@ export default function LandingPage() {
         textAlign: "center", maxWidth: 800, margin: "0 auto", padding: "160px 24px 100px",
         position: "relative", zIndex: 1
       }}>
-        {/* Badge */}
         <div className="fade-up" style={{
           display: "inline-flex", alignItems: "center", gap: 8,
           padding: "6px 16px", borderRadius: 99,
@@ -108,15 +122,20 @@ export default function LandingPage() {
         </div>
 
         <div className="fade-up fade-up-d3" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-          <a href="/auth/login" className="btn-primary" style={{ fontSize: 16, padding: "14px 32px" }}>
-            Launch Your Command Center →
-          </a>
+          {session ? (
+            <a href="/dashboard" className="btn-primary" style={{ fontSize: 16, padding: "14px 32px" }}>
+              Enter Command Center →
+            </a>
+          ) : (
+            <a href="/auth/login" className="btn-primary" style={{ fontSize: 16, padding: "14px 32px" }}>
+              Launch Your Command Center →
+            </a>
+          )}
           <a href="#how-it-works" className="btn-secondary" style={{ fontSize: 16, padding: "14px 32px" }}>
             How It Works
           </a>
         </div>
 
-        {/* Trust badges */}
         <div className="fade-up fade-up-d4" style={{ marginTop: 56 }}>
           <TrueFocus 
             sentence="Zero trust architecture | Credentials never exposed | Step-up auth on sensitive actions" 
@@ -130,7 +149,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Agent Cards ── */}
+      {/* ... Rest of the page components remain the same ... */}
       <section style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px 120px", position: "relative", zIndex: 1 }}>
         <div style={{ textAlign: "center", marginBottom: 48 }}>
           <p className="section-title">Your Specialized Sub-Agents</p>
@@ -166,7 +185,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── How It Works ── */}
       <section id="how-it-works" style={{ maxWidth: 900, margin: "0 auto", padding: "0 24px 120px", position: "relative", zIndex: 1 }}>
         <div style={{ textAlign: "center", marginBottom: 48 }}>
           <p className="section-title">How It Works</p>
@@ -196,7 +214,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── CTA ── */}
       <section style={{ textAlign: "center", padding: "0 24px 120px", position: "relative", zIndex: 1 }}>
         <div className="glass-card-glow fade-up" style={{
           maxWidth: 620, margin: "0 auto", padding: "56px 48px",
@@ -207,13 +224,12 @@ export default function LandingPage() {
           <p style={{ color: "var(--text-secondary)", marginBottom: 36, lineHeight: 1.7, maxWidth: 440, margin: "0 auto 36px" }}>
             Your agents await. Securely authorized through Auth0. Permanently under your control.
           </p>
-          <a href="/auth/login" className="btn-primary" style={{ fontSize: 16, padding: "16px 40px" }}>
-            Connect Your Agents →
+          <a href={session ? "/dashboard" : "/auth/login"} className="btn-primary" style={{ fontSize: 16, padding: "16px 40px" }}>
+            {session ? "Enter Command Center →" : "Connect Your Agents →"}
           </a>
         </div>
       </section>
 
-      {/* ── Footer ── */}
       <footer style={{
         borderTop: "1px solid rgba(255,255,255,0.04)", padding: "28px",
         textAlign: "center", color: "var(--text-muted)", fontSize: 13
